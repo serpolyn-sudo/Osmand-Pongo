@@ -1,0 +1,127 @@
+name: OsmAnd GPSRadar - clean upstream integration APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/osmand-gpsradar-clean]
+    paths:
+      - 'gpsradar/**'
+      - '.github/workflows/gpsradar-build.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout GPSRadar patches (no Pongo)
+        uses: actions/checkout@v4
+        with:
+          path: gpsradar_repo
+      - name: Checkout original OsmAnd
+        uses: actions/checkout@v4
+        with:
+          repository: osmandapp/OsmAnd
+          path: android
+          submodules: recursive
+      - name: Checkout OsmAnd resources
+        uses: actions/checkout@v4
+        with:
+          repository: osmandapp/OsmAnd-resources
+          path: resources
+      - name: Checkout OsmAnd core
+        uses: actions/checkout@v4
+        with:
+          repository: osmandapp/OsmAnd-core
+          path: core
+      - name: Checkout OsmAnd core legacy
+        uses: actions/checkout@v4
+        with:
+          repository: osmandapp/OsmAnd-core-legacy
+          path: core-legacy
+      - name: Checkout OsmAnd build
+        uses: actions/checkout@v4
+        with:
+          repository: osmandapp/OsmAnd-build
+          path: build
+      - name: Checkout OsmAnd tools
+        uses: actions/checkout@v4
+        with:
+          repository: osmandapp/OsmAnd-tools
+          path: tools
+      - name: Checkout OsmAnd misc
+        uses: actions/checkout@v4
+        with:
+          repository: osmandapp/OsmAnd-misc
+          path: misc
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Configure Android SDK
+        run: |
+          echo "ANDROID_HOME=${ANDROID_SDK_ROOT}" >> "$GITHUB_ENV"
+          ls "${ANDROID_SDK_ROOT}/build-tools"
+      - name: Apply distinct clean GPSRadar application identity
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          build=Path("android/OsmAnd/build.gradle")
+          s=build.read_text()
+          old='applicationId "net.osmand.dev"'
+          assert s.count(old)==1, "Original OsmAnd Nightly ID not found"
+          s=s.replace(old,'applicationId "com.osmand.gpsradar"',1)
+          oldName='resValue "string", "app_name", "OsmAnd Nightly"'
+          assert s.count(oldName)==1
+          s=s.replace(oldName,'resValue "string", "app_name", "OsmAnd GPSRadar"',1)
+          build.write_text(s)
+          manifest=Path("android/OsmAnd/AndroidManifest-nightlyFree.xml")
+          xml=manifest.read_text()
+          oldAuthority='android:authorities="net.osmand.dev.fileprovider"'
+          assert xml.count(oldAuthority)==1
+          manifest.write_text(xml.replace(oldAuthority,
+                 'android:authorities="com.osmand.gpsradar.fileprovider"',1))
+          PY
+      - name: Integrate native GPSRadar classes, widget and download UI
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -d gpsradar_repo/overlays
+          test -f gpsradar_repo/gpsradar/android/net/osmand/plus/gpsradar/GpsRadarEngine.java
+          cp -a gpsradar_repo/gpsradar/android/. android/OsmAnd/src/
+          cp -a gpsradar_repo/gpsradar/overlays/OsmAnd/. android/OsmAnd/
+          python3 - <<'PY'
+          from pathlib import Path
+          widget=Path("android/OsmAnd/src/net/osmand/plus/views/mapwidgets/WidgetType.java").read_text()
+          assert 'GPSRADAR_ALERT(' in widget
+          assert 'GpsRadarAlertWidget' in Path(
+              "android/OsmAnd/src/net/osmand/plus/views/mapwidgets/MapWidgetsFactory.java").read_text()
+          assert 'new GpsRadarMapLayer(app)' in Path(
+              "android/OsmAnd/src/net/osmand/plus/views/MapLayers.java").read_text()
+          print("GPSRadar native hooks added; original OsmAnd map UI preserved")
+          PY
+      - name: Build separate GPSRadar APK
+        working-directory: android
+        env:
+          GRADLE_OPTS: '-Dorg.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8'
+        run: |
+          chmod +x gradlew
+          ./gradlew :OsmAnd:assembleNightlyFreeLegacyFatDebug --stacktrace --no-daemon
+      - name: Inspect APK identity
+        shell: bash
+        run: |
+          APK=$(find android/OsmAnd/build/outputs/apk -type f -name '*.apk' | head -1)
+          test -n "$APK"
+          AAPT="${ANDROID_SDK_ROOT}/build-tools/$(ls "${ANDROID_SDK_ROOT}/build-tools" | sort -V | tail -1)/aapt"
+          "$AAPT" dump badging "$APK" | grep -m1 "package: name='com.osmand.gpsradar'"
+      - name: Save built APK
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: OsmAnd-GPSRadar-clean-debug-apk
+          path: android/OsmAnd/build/outputs/apk/**/*.apk
+          if-no-files-found: warn
+          retention-days: 14
