@@ -16,7 +16,7 @@
 		android:layout_width="74dp"
 		android:layout_height="74dp"
 		android:layout_gravity="start"
-		android:background="@drawable/speed_limit_shape"
+		android:background="@drawable/pongo_speed_limit_circle"
 		android:elevation="2dp"
 		android:gravity="center"
 		android:orientation="vertical"
@@ -35,7 +35,7 @@
 			android:paddingTop="2dp"
 			android:text="@string/shared_string_limit"
 			android:textAllCaps="true"
-			android:textColor="@color/widgettext_day"
+			android:textColor="#FF111111"
 			android:textSize="11sp" />
 
 		<androidx.appcompat.widget.AppCompatTextView
@@ -51,7 +51,7 @@
 			android:gravity="center"
 			android:lines="1"
 			android:includeFontPadding="false"
-			android:textColor="@color/widgettext_day"
+			android:textColor="#FF111111"
 			android:textSize="24sp"
 			tools:text="85" />
 
