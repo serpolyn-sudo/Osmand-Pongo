@@ -7,12 +7,14 @@ import net.osmand.plus.activities.MapActivity;
 import net.osmand.plus.views.layers.base.OsmandMapLayer.DrawSettings;
 import net.osmand.plus.views.mapwidgets.WidgetsPanel;
 import net.osmand.plus.gpsradar.GpsRadarState;
+import net.osmand.plus.gpsradar.GpsRadarIconProvider;
 import net.osmand.plus.gpsradar.GpsRadarSettingsDialog;
 import net.osmand.plus.views.mapwidgets.WidgetType;
 
 /** Registered with the original OsmAnd widget catalog (left/right/top/bottom). */
 public class GpsRadarAlertWidget extends SimpleWidget {
     private long updated;
+    private int lastIconType=-1;
     public GpsRadarAlertWidget(@NonNull MapActivity activity, @Nullable String customId,
                                @Nullable WidgetsPanel panel) {
         super(activity, WidgetType.GPSRADAR_ALERT, customId, panel);
@@ -31,6 +33,11 @@ public class GpsRadarAlertWidget extends SimpleWidget {
         if(s==null || s.point==null) {
             setText(NO_VALUE, "GPSRadar");
             return;
+        }
+        if(s.point.type!=lastIconType) {
+            lastIconType=s.point.type;
+            android.graphics.drawable.Drawable icon=GpsRadarIconProvider.drawable(app,s.point.type);
+            if(icon!=null)setImageDrawable(icon);
         }
         String primary=s.distanceMeters<1000?s.distanceMeters+" м":
                 String.format(java.util.Locale.getDefault(),"%.1f км",s.distanceMeters/1000d);
