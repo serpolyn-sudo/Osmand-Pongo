@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 
 import net.osmand.data.RotatedTileBox;
 import net.osmand.plus.OsmandApplication;
+import net.osmand.plus.settings.backend.ApplicationMode;
 import net.osmand.plus.views.layers.base.OsmandMapLayer;
 
 import java.util.HashMap;
@@ -47,7 +48,7 @@ public final class GpsRadarMapLayer extends OsmandMapLayer {
         android.content.SharedPreferences pref=app.getSharedPreferences(
                 "gpsradar_profile_"+profile,Context.MODE_PRIVATE);
         if(!pref.getBoolean("markers",true))return;
-        String vehicle="truck".equalsIgnoreCase(profile)?"truck":"car";
+        String vehicle=app.getSettings().getApplicationMode().isDerivedRoutingFrom(ApplicationMode.TRUCK)?"truck":"car";
         double lat=box.getLatitude(),lon=box.getLongitude();
         int zoom=box.getZoom();
         long now=android.os.SystemClock.elapsedRealtime();
