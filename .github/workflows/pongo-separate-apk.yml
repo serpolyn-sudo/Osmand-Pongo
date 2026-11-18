@@ -152,16 +152,19 @@ jobs:
           test -f pongo/overlays/res/layout-port/speedometer_widget.xml
           test -f pongo/overlays/res/layout-port/map_hud_top.xml
           test -f pongo/overlays/res/layout-port/map_hud_bottom.xml
-          mkdir -p android/OsmAnd/res/layout-port
+          test -f pongo/overlays/res/drawable/pongo_speedometer_panel.xml
+          mkdir -p android/OsmAnd/res/layout-port android/OsmAnd/res/drawable
           cp pongo/overlays/res/layout-port/speedometer_widget.xml android/OsmAnd/res/layout-port/speedometer_widget.xml
           cp pongo/overlays/res/layout-port/map_hud_top.xml android/OsmAnd/res/layout-port/map_hud_top.xml
           cp pongo/overlays/res/layout-port/map_hud_bottom.xml android/OsmAnd/res/layout-port/map_hud_bottom.xml
+          cp pongo/overlays/res/drawable/pongo_speedometer_panel.xml android/OsmAnd/res/drawable/pongo_speedometer_panel.xml
           python3 - <<'PY'
           from pathlib import Path
           from xml.etree import ElementTree as ET
           for name in ('speedometer_widget.xml', 'map_hud_top.xml', 'map_hud_bottom.xml'):
               portrait = Path('android/OsmAnd/res/layout-port') / name
               ET.parse(portrait)
+          ET.parse('android/OsmAnd/res/drawable/pongo_speedometer_panel.xml')
           speed = Path('android/OsmAnd/res/layout-port/speedometer_widget.xml').read_text()
           assert speed.index('id="@+id/speed_limit_container"') < speed.index('id="@+id/speedometer_container"')
           print('Portrait overrides installed and parsed; landscape layouts left intact')
