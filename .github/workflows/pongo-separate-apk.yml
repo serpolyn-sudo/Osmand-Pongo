@@ -154,6 +154,7 @@ jobs:
           test -f pongo/overlays/res/layout-port/map_hud_bottom.xml
           test -f pongo/overlays/res/layout-port/map_hud_layout.xml
           test -f pongo/overlays/java/net/osmand/plus/views/controls/PongoRouteBar.java
+          test -f pongo/overlays/java/net/osmand/plus/views/controls/PongoTopHud.java
           test -f pongo/overlays/res/drawable/pongo_speedometer_panel.xml
           mkdir -p android/OsmAnd/res/layout-port android/OsmAnd/res/drawable android/OsmAnd/src/net/osmand/plus/views/controls
           cp pongo/overlays/res/layout-port/speedometer_widget.xml android/OsmAnd/res/layout-port/speedometer_widget.xml
@@ -161,6 +162,7 @@ jobs:
           cp pongo/overlays/res/layout-port/map_hud_bottom.xml android/OsmAnd/res/layout-port/map_hud_bottom.xml
           cp pongo/overlays/res/layout-port/map_hud_layout.xml android/OsmAnd/res/layout-port/map_hud_layout.xml
           cp pongo/overlays/java/net/osmand/plus/views/controls/PongoRouteBar.java android/OsmAnd/src/net/osmand/plus/views/controls/PongoRouteBar.java
+          cp pongo/overlays/java/net/osmand/plus/views/controls/PongoTopHud.java android/OsmAnd/src/net/osmand/plus/views/controls/PongoTopHud.java
           cp pongo/overlays/res/drawable/pongo_speedometer_panel.xml android/OsmAnd/res/drawable/pongo_speedometer_panel.xml
           python3 - <<'PY'
           from pathlib import Path
@@ -173,6 +175,7 @@ jobs:
           assert speed.index('id="@+id/speed_limit_container"') < speed.index('id="@+id/speedometer_container"')
           hud = Path('android/OsmAnd/res/layout-port/map_hud_layout.xml').read_text()
           assert 'net.osmand.plus.views.controls.PongoRouteBar' in hud
+          assert 'net.osmand.plus.views.controls.PongoTopHud' in hud
           print('Portrait overrides installed and parsed; landscape layouts left intact')
           PY
 
