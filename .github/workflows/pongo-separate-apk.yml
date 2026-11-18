@@ -94,7 +94,16 @@ jobs:
           content = content.replace(original_id, 'applicationId "com.osmand.pongo"', 1)
           content = content.replace(original_name, 'resValue "string", "app_name", "OsmAnd-Pongo"', 1)
           build.write_text(content)
-          print("Pongo package and display name patched for nightlyFree flavor")
+
+          # The nightly flavor hard-codes the FileProvider authority to net.osmand.dev.
+          # Android requires provider authorities to be globally unique across installed apps.
+          manifest = Path("android/OsmAnd/AndroidManifest-nightlyFree.xml")
+          xml = manifest.read_text()
+          old_authority = 'android:authorities="net.osmand.dev.fileprovider"'
+          assert xml.count(old_authority) == 1, "Unexpected nightly FileProvider authority; refusing unsafe patch"
+          xml = xml.replace(old_authority, 'android:authorities="com.osmand.pongo.fileprovider"', 1)
+          manifest.write_text(xml)
+          print("Pongo nightly FileProvider authority patched")
           PY
           grep -A6 'nightlyFree {' android/OsmAnd/build.gradle | tail -n 6
 
@@ -103,6 +112,18 @@ jobs:
         env:
           GRADLE_OPTS: '-Dorg.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8'
         run: ./gradlew :OsmAnd:assembleNightlyFreeLegacyFatDebug --stacktrace --no-daemon
+
+      - name: Check APK identity and provider authorities
+        shell: bash
+        run: |
+          APK=$(find android/OsmAnd/build/outputs/apk -type f -name '*.apk' | head -n 1)
+          test -n "$APK"
+          echo "APK: $APK"
+          AAPT="${ANDROID_SDK_ROOT}/build-tools/$(ls "${ANDROID_SDK_ROOT}/build-tools" | sort -V | tail -n 1)/aapt"
+          "$AAPT" dump badging "$APK" | grep -m1 "^package:"
+          "$AAPT" dump badging "$APK" | grep -m1 "^application-label:"
+          PACKAGE=$("$AAPT" dump badging "$APK" | sed -n "s/^package: name='\\([^']*\\)'.*/\\1/p" | head -n 1)
+          test "$PACKAGE" = "com.osmand.pongo"
 
       - name: Upload APK if generated
         if: always()
