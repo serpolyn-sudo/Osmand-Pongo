@@ -9,6 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import net.osmand.plus.OsmandApplication;
+import net.osmand.plus.settings.backend.ApplicationMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,10 @@ import java.util.List;
 public final class GpsRadarSettingsDialog {
     private GpsRadarSettingsDialog() {}
     public static void show(Activity activity, OsmandApplication app) {
-        String profile=app.getSettings().getApplicationMode().getStringKey();
+        show(activity,app,app.getSettings().getApplicationMode());
+    }
+    public static void show(Activity activity, OsmandApplication app, ApplicationMode mode) {
+        String profile=mode.getStringKey();
         SharedPreferences pref=app.getSharedPreferences(
                 "gpsradar_profile_"+profile,Context.MODE_PRIVATE);
         String vehicle="truck".equalsIgnoreCase(profile)?"Грузовые":"Легковые";
@@ -31,19 +35,19 @@ public final class GpsRadarSettingsDialog {
                 .setTitle("GPSRadar • "+profile+" • "+vehicle)
                 .setItems(actions,(dialog,index)->{
                     switch(index) {
-                        case 0 -> modes(activity,app,pref);
+                        case 0 -> modes(activity,app,mode,pref);
                         case 1 -> {
                             pref.edit().putBoolean("markers",!pref.getBoolean("markers",true)).apply();
-                            show(activity,app);
+                            show(activity,app,mode);
                         }
-                        case 2 -> editText(activity,app,pref,true);
-                        case 3 -> editText(activity,app,pref,false);
-                        case 4 -> types(activity,app,pref);
+                        case 2 -> editText(activity,app,mode,pref,true);
+                        case 3 -> editText(activity,app,mode,pref,false);
+                        case 4 -> types(activity,app,mode,pref);
                     }
                 }).setNegativeButton("Закрыть",null).show();
     }
     private static void modes(Activity activity,OsmandApplication app,
-                              SharedPreferences pref) {
+                              ApplicationMode mode,SharedPreferences pref) {
         boolean oldExtended=pref.getBoolean("extended",false);
         new AlertDialog.Builder(activity).setTitle("Предупреждения GPSRadar")
           .setSingleChoiceItems(new String[]{"Штатные OsmAnd","Расширенные GPSRadar"},
@@ -51,11 +55,11 @@ public final class GpsRadarSettingsDialog {
                 boolean extended=selection==1;
                 // Prevent duplicate stock camera speech in the enhanced mode.
                 if(extended&&!oldExtended) {
-                    boolean nativeVoice=app.getSettings().SPEAK_SPEED_CAMERA.get();
+                    boolean nativeVoice=app.getSettings().SPEAK_SPEED_CAMERA.getModeValue(mode);
                     pref.edit().putBoolean("saved_native_voice",nativeVoice).apply();
-                    app.getSettings().SPEAK_SPEED_CAMERA.set(false);
+                    app.getSettings().SPEAK_SPEED_CAMERA.setModeValue(mode,false);
                 } else if(!extended&&oldExtended) {
-                    app.getSettings().SPEAK_SPEED_CAMERA.set(
+                    app.getSettings().SPEAK_SPEED_CAMERA.setModeValue(mode,
                         pref.getBoolean("saved_native_voice",false));
                 }
                 pref.edit().putBoolean("extended",extended).apply();
@@ -63,7 +67,7 @@ public final class GpsRadarSettingsDialog {
           }).setNegativeButton("Отмена",null).show();
     }
     private static void editText(Activity activity,OsmandApplication app,
-                      SharedPreferences pref,boolean triggers) {
+                      ApplicationMode mode,SharedPreferences pref,boolean triggers) {
         EditText field=new EditText(activity);
         field.setSingleLine(true);
         field.setText(triggers?pref.getString("thresholds","700,300,150"):
@@ -98,7 +102,7 @@ public final class GpsRadarSettingsDialog {
           }).show();
     }
     private static void types(Activity activity,OsmandApplication app,
-                              SharedPreferences pref) {
+                              ApplicationMode mode,SharedPreferences pref) {
         String[] labels=new String[32];
         boolean[] enabled=new boolean[32];
         for(int i=0;i<32;i++) {
@@ -107,7 +111,7 @@ public final class GpsRadarSettingsDialog {
             enabled[i]=pref.getBoolean("type_"+type,true);
         }
         new AlertDialog.Builder(activity)
-           .setTitle("Типы GPSRadar — "+app.getSettings().getApplicationMode().getStringKey())
+           .setTitle("Типы GPSRadar — "+mode.getStringKey())
            .setMultiChoiceItems(labels,enabled,(dialog,index,value)->enabled[index]=value)
            .setNegativeButton("Отмена",null)
            .setPositiveButton("Применить",(dialog,button)->{
