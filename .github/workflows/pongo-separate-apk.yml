@@ -146,7 +146,7 @@ jobs:
           PY
           grep -A6 'nightlyFree {' android/OsmAnd/build.gradle | tail -n 6
 
-      - name: Overlay portrait Pongo HUD resources
+      - name: Overlay Pongo HUD and replace native map buttons in both orientations
         shell: bash
         run: |
           # Uses separate Android layout-port resources: landscape resources remain unchanged.
@@ -156,12 +156,13 @@ jobs:
           test -f pongo/overlays/res/layout-port/map_hud_layout.xml
           test -f pongo/overlays/java/net/osmand/plus/views/controls/PongoRouteBar.java
           test -f pongo/overlays/java/net/osmand/plus/views/controls/PongoTopHud.java
+          test -f pongo/overlays/java/net/osmand/plus/views/layers/MapControlsLayer.java
           test -f pongo/overlays/res/drawable/pongo_speedometer_panel.xml
           test -f pongo/overlays/res/drawable/pongo_speed_limit_circle.xml
           for name in map_hud_layout.xml map_hud_top.xml map_hud_bottom.xml speedometer_widget.xml; do
             test -f "pongo/overlays/res/layout-land/$name"
           done
-          mkdir -p android/OsmAnd/res/layout-port android/OsmAnd/res/layout-land android/OsmAnd/res/drawable android/OsmAnd/src/net/osmand/plus/views/controls
+          mkdir -p android/OsmAnd/res/layout-port android/OsmAnd/res/layout-land android/OsmAnd/res/drawable android/OsmAnd/src/net/osmand/plus/views/controls android/OsmAnd/src/net/osmand/plus/views/layers
           cp pongo/overlays/res/layout-port/speedometer_widget.xml android/OsmAnd/res/layout-port/speedometer_widget.xml
           cp pongo/overlays/res/layout-port/map_hud_top.xml android/OsmAnd/res/layout-port/map_hud_top.xml
           cp pongo/overlays/res/layout-port/map_hud_bottom.xml android/OsmAnd/res/layout-port/map_hud_bottom.xml
@@ -171,6 +172,7 @@ jobs:
           done
           cp pongo/overlays/java/net/osmand/plus/views/controls/PongoRouteBar.java android/OsmAnd/src/net/osmand/plus/views/controls/PongoRouteBar.java
           cp pongo/overlays/java/net/osmand/plus/views/controls/PongoTopHud.java android/OsmAnd/src/net/osmand/plus/views/controls/PongoTopHud.java
+          cp pongo/overlays/java/net/osmand/plus/views/layers/MapControlsLayer.java android/OsmAnd/src/net/osmand/plus/views/layers/MapControlsLayer.java
           cp pongo/overlays/res/drawable/pongo_speedometer_panel.xml android/OsmAnd/res/drawable/pongo_speedometer_panel.xml
           cp pongo/overlays/res/drawable/pongo_speed_limit_circle.xml android/OsmAnd/res/drawable/pongo_speed_limit_circle.xml
           python3 - <<'PY'
