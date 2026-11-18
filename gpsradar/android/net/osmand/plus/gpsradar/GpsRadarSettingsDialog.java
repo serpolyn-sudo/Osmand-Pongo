@@ -24,7 +24,7 @@ public final class GpsRadarSettingsDialog {
         String profile=mode.getStringKey();
         SharedPreferences pref=app.getSharedPreferences(
                 "gpsradar_profile_"+profile,Context.MODE_PRIVATE);
-        String vehicle="truck".equalsIgnoreCase(profile)?"Грузовые":"Легковые";
+        String vehicle=mode.isDerivedRoutingFrom(ApplicationMode.TRUCK)?"Грузовые":"Легковые";
         String[] actions={"Режим предупреждений: "+(pref.getBoolean("extended",false)?
                     "Расширенный":"Штатный"),
                 "Показывать все объекты: "+(pref.getBoolean("markers",true)?"Да":"Нет"),
