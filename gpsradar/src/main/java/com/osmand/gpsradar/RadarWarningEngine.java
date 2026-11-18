@@ -23,7 +23,8 @@ public final class RadarWarningEngine {
     public List<Warning> check(double lat, double lon, double heading, double gpsSpeedKmh,
                                List<RadarCamera> candidates, RadarProfileSettings.Profile settings) {
         List<Warning> result = new ArrayList<>();
-        if (!settings.enabled || candidates == null) return result;
+        if (!settings.enabled || settings.mode != RadarProfileSettings.Mode.EXTENDED
+                || candidates == null) return result;
         for (RadarCamera c: candidates) {
             if (!settings.typeEnabled[c.type]) continue;
             int distance = (int)Math.round(distanceMeters(lat,lon,c.latitude,c.longitude));
