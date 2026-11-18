@@ -42,6 +42,13 @@
 			app:topPanel="false" />
 
 
+        <!-- Portrait turn directions and live clock/altitude from navigation and GPS. -->
+        <net.osmand.plus.views.controls.PongoTopHud
+            android:id="@+id/pongo_top_hud"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top" />
+
         <!-- Portrait Pongo route info: calculated by RoutingHelper, no sample values. -->
         <net.osmand.plus.views.controls.PongoRouteBar
             android:id="@+id/pongo_route_bar"
