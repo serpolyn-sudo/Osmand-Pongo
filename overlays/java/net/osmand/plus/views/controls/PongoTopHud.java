@@ -41,6 +41,7 @@ public class PongoTopHud extends LinearLayout {
     private final OsmandApplication app;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Map<View, Integer> nativeVisibility = new IdentityHashMap<>();
+    private final Map<View, Float> nativeAlpha = new IdentityHashMap<>();
     private final LinearLayout routeHeader;
     private final LinearLayout turns;
     private final ImageView primaryIcon;
@@ -269,8 +270,8 @@ public class PongoTopHud extends LinearLayout {
         CurrentStreetName name = routing.getCurrentName(next, false);
         String realName = name != null ? name.text : null;
         boolean hasName = !TextUtils.isEmpty(realName);
-        routeHeader.setVisibility(hasName ? VISIBLE : GONE);
-        if (hasName) routeText.setText("• " + realName);
+        // Current road appears in the bottom Pongo bar; no duplicate top banner.
+        routeHeader.setVisibility(GONE);
     }
 
     private void setNativeWidgetsHidden(boolean active) {
@@ -297,6 +298,8 @@ public class PongoTopHud extends LinearLayout {
             if (nativeView == null || nativeView == this) continue;
             if (!nativeVisibility.containsKey(nativeView))
                 nativeVisibility.put(nativeView, nativeView.getVisibility());
+            if (!nativeAlpha.containsKey(nativeView)) nativeAlpha.put(nativeView, nativeView.getAlpha());
+            nativeView.setAlpha(0f);
             nativeView.setVisibility(INVISIBLE);
         }
     }
@@ -306,5 +309,9 @@ public class PongoTopHud extends LinearLayout {
             entry.getKey().setVisibility(entry.getValue());
         }
         nativeVisibility.clear();
+        for (Map.Entry<View, Float> entry : nativeAlpha.entrySet()) {
+            entry.getKey().setAlpha(entry.getValue());
+        }
+        nativeAlpha.clear();
     }
 }
