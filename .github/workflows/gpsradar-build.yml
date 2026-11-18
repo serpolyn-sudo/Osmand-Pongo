@@ -90,6 +90,9 @@ jobs:
           set -euo pipefail
           test ! -d gpsradar_repo/overlays
           test -f gpsradar_repo/gpsradar/android/net/osmand/plus/gpsradar/GpsRadarEngine.java
+          test -s gpsradar_repo/gpsradar/overlays/OsmAnd/assets/gpsradar_icons/atlas24.png
+          test -f gpsradar_repo/gpsradar/overlays/OsmAnd/src/net/osmand/plus/settings/fragments/ScreenAlertsFragment.java
+          test -f gpsradar_repo/gpsradar/overlays/OsmAnd/res/xml/screen_alerts.xml
           cp -a gpsradar_repo/gpsradar/android/. android/OsmAnd/src/
           cp -a gpsradar_repo/gpsradar/overlays/OsmAnd/. android/OsmAnd/
           python3 - <<'PY'
@@ -100,7 +103,10 @@ jobs:
               "android/OsmAnd/src/net/osmand/plus/views/mapwidgets/MapWidgetsFactory.java").read_text()
           assert 'new GpsRadarMapLayer(app)' in Path(
               "android/OsmAnd/src/net/osmand/plus/views/MapLayers.java").read_text()
-          print("GPSRadar native hooks added; original OsmAnd map UI preserved")
+          assert 'gpsradar_settings' in Path(
+              "android/OsmAnd/res/xml/screen_alerts.xml").read_text()
+          assert Path("android/OsmAnd/assets/gpsradar_icons/atlas24.png").stat().st_size > 1000
+          print("GPSRadar native hooks, original 32-icon atlas and profile settings installed")
           PY
       - name: Build separate GPSRadar APK
         working-directory: android
