@@ -108,6 +108,35 @@ jobs:
           # The temporary PONGO NAV badge was removed. Preserve native map widgets
           # until route-aware Pongo HUD controls are implemented and tested.
           print("Pongo badge removed; native map layout preserved")
+          # First substantial HUD layout pass: retain live OsmAnd speed and
+          # limit widgets rather than inserting hardcoded navigation values.
+          speedometer = Path("android/OsmAnd/res/layout/speedometer_widget.xml")
+          speed_xml = speedometer.read_text()
+          assert speed_xml.count('android:layout_width="88dp"') == 1
+          assert speed_xml.count('android:layout_height="96dp"') == 1
+          assert speed_xml.count('android:layout_width="72dp"') == 1
+          assert speed_xml.count('android:layout_height="72dp"') >= 1
+          speed_xml = speed_xml.replace('android:layout_width="88dp"', 'android:layout_width="102dp"', 1)
+          speed_xml = speed_xml.replace('android:layout_height="96dp"', 'android:layout_height="90dp"', 1)
+          speed_xml = speed_xml.replace('android:layout_width="72dp"', 'android:layout_width="78dp"', 1)
+          speed_xml = speed_xml.replace('android:layout_height="72dp"', 'android:layout_height="78dp"', 1)
+          speedometer.write_text(speed_xml)
+
+          # Reposition live left/right OsmAnd widget columns inward from edges.
+          hud = Path("android/OsmAnd/res/layout/map_hud_top.xml")
+          hud_xml = hud.read_text()
+          assert hud_xml.count('android:id="@+id/map_left_widgets_panel"') == 1
+          assert hud_xml.count('android:id="@+id/map_right_widgets_panel"') == 1
+          for side, margin in (('map_left_widgets_panel', '12dp'), ('map_right_widgets_panel', '12dp')):
+              marker = 'android:id="@+id/' + side + '"'
+              pos = hud_xml.index(marker)
+              gravity = 'android:layout_gravity="top|start"' if side.startswith('map_left') else 'android:layout_gravity="top|end"'
+              gpos = hud_xml.index(gravity, pos)
+              assert gpos >= pos
+              extra = 'android:layout_marginStart="' + margin + '"' if side.startswith('map_left') else 'android:layout_marginEnd="' + margin + '"'
+              hud_xml = hud_xml[:gpos] + extra + '\\n\\t\\t' + hud_xml[gpos:]
+          hud.write_text(hud_xml)
+          print("Pongo HUD: enlarged speed and speed-limit views, inset side widget columns")
           PY
           grep -A6 'nightlyFree {' android/OsmAnd/build.gradle | tail -n 6
 
