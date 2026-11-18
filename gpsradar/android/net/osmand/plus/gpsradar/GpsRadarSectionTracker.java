@@ -35,10 +35,11 @@ public final class GpsRadarSectionTracker {
     public void reset() { active=false; previous=null; travelled=0;startNanos=0; }
 
     public Reading update(Location position, List<GpsRadarPoint> nearby) {
-        if (position==null || !position.hasAccuracy() || position.getAccuracy()>65f
-                || !position.hasSpeed() || position.getSpeed()<1.4f) {
+        if (position==null || !position.hasAccuracy() || position.getAccuracy()>65f) {
             return snapshot(false);
         }
+        // Update the elapsed clock even during a traffic stop so the true
+        // section average decreases rather than freezing at the last movement.
         long time=android.os.SystemClock.elapsedRealtimeNanos();
         if(time<=0) return snapshot(false);
         if(active && previous!=null && lastNanos>0) {
@@ -52,6 +53,8 @@ public final class GpsRadarSectionTracker {
         }
         previous=new Location(position);
         lastNanos=time;
+        if (!position.hasSpeed() || position.getSpeed()<1.4f)
+            return snapshot(false);
 
         GpsRadarPoint start=null,end=null;
         float startMeters=Float.MAX_VALUE,endMeters=Float.MAX_VALUE;
