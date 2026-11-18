@@ -40,3 +40,11 @@ Reference: user's iGO Pongo navigation screenshots, particularly the landscape n
 - Native Android `res/layout-port/` overrides are used to make portrait widget containers independent of landscape. The first committed implementation moves real native speed-limit above speedometer and adjusts the portrait top panel insets; it does **not** yet implement the full screenshot-style HUD, route banner, battery-menu hybrid control, or all route readouts.
 - Every data value must come from OsmAnd live navigation, GPS or system state; don't hardcode the values appearing in the reference picture.
 - **Do not trigger APK builds until layout preview has been reviewed.** The implementation is prepared on `feature/portrait-pongo-hud`, distinct from `main`. A later merge to `main` may trigger automatic Actions runs because of workflow path triggers.
+
+## Implementation checkpoint — portrait HUD resource wiring
+- `overlays/res/layout-port/map_hud_top.xml`: portrait top-side native widget panels.
+- `overlays/res/layout-port/map_hud_bottom.xml`: portrait positioning of live speed/limit widget above lower controls.
+- `overlays/res/layout-port/speedometer_widget.xml`: native GPS speed and limit values; portrait limit above speed; dark rounded speed panel with white text.
+- `overlays/res/drawable/pongo_speedometer_panel.xml`: panel background.
+- GitHub workflow checks out **this** repository into `pongo/` before applying its overlays to upstream OsmAnd. It copies all portrait resources, verifies XML parse, and retains landscape resources.
+- This is a partial, uncompiled implementation. Still missing: screenshot-style route banner, ETA/duration/distance composite, battery/menu hybrid button, clock/elevation styling, and guaranteed native turn-panel placement. No APK verification yet.
