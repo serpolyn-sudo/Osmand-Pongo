@@ -30,6 +30,7 @@ public final class GpsRadarMapLayer extends OsmandMapLayer {
     private final ExecutorService worker=Executors.newSingleThreadExecutor();
     private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG|Paint.FILTER_BITMAP_FLAG);
     private final Map<Integer,Bitmap> icons=new HashMap<>();
+    private Bitmap originalIconAtlas;
     private volatile List<GpsRadarPoint> visible=java.util.Collections.emptyList();
     private volatile boolean queryRunning=false;
     private volatile long lastQuery=0;
@@ -92,10 +93,22 @@ public final class GpsRadarMapLayer extends OsmandMapLayer {
     private Bitmap icon(int type) {
         if(icons.containsKey(type))return icons.get(type);
         Bitmap bitmap=null;
-        try(java.io.InputStream input=app.getAssets().open(
-                "gpsradar_icons/"+type+".png")) {
-            bitmap=BitmapFactory.decodeStream(input);
-        } catch(Exception ignored) { }
+        try {
+            if(originalIconAtlas==null) {
+                try(java.io.InputStream input=app.getAssets().open(
+                        "gpsradar_icons/atlas24.png")) {
+                    originalIconAtlas=BitmapFactory.decodeStream(input);
+                }
+            }
+            if(originalIconAtlas!=null && originalIconAtlas.getWidth()==192 &&
+                    originalIconAtlas.getHeight()==96 && type>=32 && type<=63) {
+                int index=type-32;
+                bitmap=Bitmap.createBitmap(originalIconAtlas,
+                        (index%8)*24,(index/8)*24,24,24);
+            }
+        } catch(Exception e) {
+            android.util.Log.w("GPSRadar","Cannot read original TYPE "+type+" icon",e);
+        }
         icons.put(type,bitmap);
         return bitmap;
     }
