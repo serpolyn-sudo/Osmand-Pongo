@@ -6,6 +6,7 @@ import android.speech.tts.TextToSpeech;
 
 import net.osmand.Location;
 import net.osmand.plus.OsmandApplication;
+import net.osmand.plus.settings.backend.ApplicationMode;
 import net.osmand.plus.OsmAndLocationProvider;
 
 import java.util.HashSet;
@@ -63,7 +64,7 @@ public final class GpsRadarEngine implements OsmAndLocationProvider.OsmAndLocati
         if(!profile.equals(lastProfile)) {
             lastProfile=profile; alerted.clear(); sections.reset();
         }
-        String vehicle="truck".equalsIgnoreCase(profile)?"truck":"car";
+        String vehicle=app.getSettings().getApplicationMode().isDerivedRoutingFrom(ApplicationMode.TRUCK)?"truck":"car";
         SharedPreferences pref=app.getSharedPreferences("gpsradar_profile_"+profile,
                                                         Context.MODE_PRIVATE);
         boolean extended=pref.getBoolean("extended",false);
