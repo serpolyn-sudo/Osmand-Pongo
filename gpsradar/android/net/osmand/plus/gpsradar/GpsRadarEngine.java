@@ -71,7 +71,7 @@ public final class GpsRadarEngine implements OsmAndLocationProvider.OsmAndLocati
         int tolerance=pref.getInt("tolerance",0);
         List<GpsRadarPoint> nearby=store.near(vehicle,fix.getLatitude(),fix.getLongitude(),3200);
         cachedPoints=nearby;
-        int[] trigger={700,300,150};
+        int[] trigger=readThresholds(pref.getString("thresholds","700,300,150"));
         GpsRadarSectionTracker.Reading avg=sections.update(fix,nearby);
         GpsRadarPoint closest=null;
         int distance=Integer.MAX_VALUE;
@@ -90,7 +90,7 @@ public final class GpsRadarEngine implements OsmAndLocationProvider.OsmAndLocati
         if(closest==null) { GpsRadarState.publish(null);return; }
         int lim=closest.speedLimitKmh==5 && closest.type==35?0:closest.speedLimitKmh;
         boolean over=lim>0 && fix.hasSpeed() && fix.getSpeed()*3.6>lim+tolerance;
-        int average=avg.active && Double.isFinite(avg.averageKmh)?
+        int average=closest.type==35 && avg.active && Double.isFinite(avg.averageKmh)?
                 (int)Math.round(avg.averageKmh):-1;
         GpsRadarState.publish(new GpsRadarState.Snapshot(closest,distance,average,over,
                 cameraLabel(closest.type)));
@@ -119,13 +119,39 @@ public final class GpsRadarEngine implements OsmAndLocationProvider.OsmAndLocati
         double d=Math.abs(((a-b)%360+360)%360); return Math.min(d,360-d);
     }
     public static String cameraLabel(int type) {
-        if(type==35)return "контроль средней скорости";
-        if(type==36)return "контроль проезда на красный";
-        if(type==38)return "железнодорожный переезд";
-        if(type==49)return "возможно тренога";
-        if(type==61)return "пешеходный переход";
-        if(type==40||type==63)return "опасный участок дороги";
-        return "камера или дорожный объект";
+        String[] names={
+          "камера контроля скорости","возможно засада",
+          "встроенная камера контроля скорости","камера контроля средней скорости",
+          "контроль проезда на красный","фото радарный комплекс",
+          "железнодорожный переезд","камера на полосе общественного транспорта",
+          "аварийно-опасный участок","школьная территория",
+          "начало населенного пункта","камера встроенная в светофор",
+          "пункт оплаты","конец населенного пункта",
+          "камера направлена в спину","контроль оплаты",
+          "знак уступи дорогу","возможно тренога",
+          "лежачий полицейский","участок плохой дороги",
+          "опасный поворот","тоннель","объект ПОИ","пост ДПС",
+          "камера контроля остановки","возможно тренога в спину",
+          "фото радарный комплекс в спину","камера контроля скорости в спину",
+          "съезд с автострады","пешеходный переход",
+          "камера наблюдения","опасный участок дороги"
+        };
+        return type>=32 && type<=63?names[type-32]:"дорожный объект";
+    }
+    private static int[] readThresholds(String text) {
+        if(text==null||text.isEmpty())return new int[]{700,300,150};
+        try {
+            String[] parts=text.split(",");
+            if(parts.length<1||parts.length>8)throw new NumberFormatException();
+            int[] result=new int[parts.length];
+            for(int i=0;i<parts.length;i++) {
+                result[i]=Integer.parseInt(parts[i].trim());
+                if(result[i]<10||result[i]>3000)throw new NumberFormatException();
+            }
+            return result;
+        } catch(NumberFormatException e) {
+            return new int[]{700,300,150};
+        }
     }
     private static final class GpsRadarSectionTrackerDistance {
         static double distance(Location fix,GpsRadarPoint p) {
