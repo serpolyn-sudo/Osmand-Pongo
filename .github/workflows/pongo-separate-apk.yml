@@ -3,7 +3,7 @@ name: OsmAnd-Pongo - separate debug APK
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, feature/portrait-pongo-hud]
     paths:
       - '.github/workflows/pongo-separate-apk.yml'
 
