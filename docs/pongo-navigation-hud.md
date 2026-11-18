@@ -1,0 +1,29 @@
+# OsmAnd-Pongo navigation HUD specification
+
+Reference: user's iGO Pongo navigation screenshots, particularly the landscape navigation view. This is a functional design target, not a claim that these widgets already exist.
+
+## Scope
+- Separate Android package `com.osmand.pongo`, retaining existing OsmAnd installation.
+- Same navigation HUD layout for both passenger-car and truck profiles; profile-dependent restrictions can be added later.
+- Show route-dependent widgets only when turn-by-turn navigation is active. Do not display fabricated navigation values.
+- Preserve map interaction, guidance, and existing OsmAnd routing.
+
+## Screen positions
+1. **Upper left:** large rounded first-turn panel with direction arrow and remaining distance to the next maneuver. Small adjacent panel indicates second maneuver and its distance when known.
+2. **Top center:** compact route shields, road identifiers and destination/city directional label when supplied by routing/map data.
+3. **Upper horizon:** road sign / POI / restrictions strip as available from reliable map data; do not claim dynamic information not in the engine.
+4. **Upper right:** clock and current elevation above mean sea level, plus a three-line button opening quick settings. Height is a measured/derived reading and should be absent when unavailable.
+5. **Lower left above trip panel:** actual GPS speed in km/h and mapped/legal speed limit on the current road (unknown limit shown as unknown). Road signs follow passenger/truck mode where data supports it.
+6. **Lower left trip panel, only during navigation:** arrival clock time, remaining travel duration, remaining route distance, in that order.
+7. **Bottom center:** current street name or road identifier.
+8. **Lower right:** battery charge percentage and three-line button opening the main menu.
+9. **Map center:** clear route-aware map with navigation perspective; no PONGO NAV branding overlay; do not cover the driving direction with opaque panels.
+
+## Engineering constraints / acceptance
+- Route widgets must subscribe to real OsmAnd navigation state and update upon recalc, reroute, GPS change and navigation stop.
+- Menu buttons must be connected to functioning destinations, not visually simulated.
+- Reuse native map turn, ETA, speed-limit, location and battery data where possible; evaluate what requires Java/Kotlin integration.
+- Treat iGO screenshots as a layout/style reference; do not copy iGO code/assets.
+- Support landscape tablet sizes and portrait phone layout responsively.
+- Check that separate APK can install alongside original, open map, start/end a route, and show no fictitious values.
+- No full implementation or validation is implied by this design file.
