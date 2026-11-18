@@ -32,10 +32,10 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * PORTRAIT Pongo HUD: the large road-shaped maneuver icon is rendered by
+ * Pongo HUD (portrait and landscape): the large road-shaped maneuver icon is rendered by
  * OsmAnd's own TurnDrawable (not text arrows). Replaces the native portrait
  * navigation panels while following a route, and restores them afterwards.
- * Landscape layouts do not contain this widget.
+ * Both orientations use this widget, sized independently.
  */
 public class PongoTopHud extends LinearLayout {
     private final OsmandApplication app;
@@ -150,8 +150,9 @@ public class PongoTopHud extends LinearLayout {
         status.setOrientation(VERTICAL);
         status.setGravity(Gravity.CENTER);
         status.setBackground(panel(11));
+        row.addView(new View(context), new LinearLayout.LayoutParams(0, 1, 1f));
         LinearLayout.LayoutParams statusParams = new LinearLayout.LayoutParams(
-                0, dp(103), 1f);
+                dp(106), dp(103));
         row.addView(status, statusParams);
 
         clock = label(23, Typeface.BOLD);
@@ -177,13 +178,16 @@ public class PongoTopHud extends LinearLayout {
     }
 
     private int dp(float value) {
-        return (int) (value * getResources().getDisplayMetrics().density + .5f);
+        float portraitFactor = getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_PORTRAIT ? 0.62f : 1f;
+        return (int) (value * portraitFactor * getResources().getDisplayMetrics().density + .5f);
     }
 
     private TextView label(int sp, int weight) {
         TextView v = new TextView(getContext());
         v.setTextColor(Color.WHITE);
-        v.setTextSize(sp);
+        v.setTextSize(sp * (getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_PORTRAIT ? 0.72f : 1f));
         v.setTypeface(Typeface.DEFAULT, weight);
         v.setGravity(Gravity.CENTER);
         v.setIncludeFontPadding(false);
@@ -270,8 +274,7 @@ public class PongoTopHud extends LinearLayout {
     }
 
     private void setNativeWidgetsHidden(boolean active) {
-        if (!active || getResources().getConfiguration().orientation
-                != Configuration.ORIENTATION_PORTRAIT) {
+        if (!active) {
             restoreNativeWidgets();
             return;
         }
@@ -282,7 +285,11 @@ public class PongoTopHud extends LinearLayout {
                 "map_left_widgets_panel",
                 "map_right_widgets_panel",
                 "map_bottom_widgets_panel",
-                "map_menu_button"}) {
+                "map_menu_button",
+                "map_zoom_in_button", "map_zoom_out_button",
+                "map_search_button", "map_compass_button",
+                "map_route_info_button", "map_my_location_button",
+                "map_quick_actions_button", "map_hud_controls"}) {
             int id = getResources().getIdentifier(
                     name, "id", getContext().getPackageName());
             if (id == 0) continue;
