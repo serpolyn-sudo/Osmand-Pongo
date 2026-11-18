@@ -152,21 +152,27 @@ jobs:
           test -f pongo/overlays/res/layout-port/speedometer_widget.xml
           test -f pongo/overlays/res/layout-port/map_hud_top.xml
           test -f pongo/overlays/res/layout-port/map_hud_bottom.xml
+          test -f pongo/overlays/res/layout-port/map_hud_layout.xml
+          test -f pongo/overlays/java/net/osmand/plus/views/controls/PongoRouteBar.java
           test -f pongo/overlays/res/drawable/pongo_speedometer_panel.xml
-          mkdir -p android/OsmAnd/res/layout-port android/OsmAnd/res/drawable
+          mkdir -p android/OsmAnd/res/layout-port android/OsmAnd/res/drawable android/OsmAnd/src/net/osmand/plus/views/controls
           cp pongo/overlays/res/layout-port/speedometer_widget.xml android/OsmAnd/res/layout-port/speedometer_widget.xml
           cp pongo/overlays/res/layout-port/map_hud_top.xml android/OsmAnd/res/layout-port/map_hud_top.xml
           cp pongo/overlays/res/layout-port/map_hud_bottom.xml android/OsmAnd/res/layout-port/map_hud_bottom.xml
+          cp pongo/overlays/res/layout-port/map_hud_layout.xml android/OsmAnd/res/layout-port/map_hud_layout.xml
+          cp pongo/overlays/java/net/osmand/plus/views/controls/PongoRouteBar.java android/OsmAnd/src/net/osmand/plus/views/controls/PongoRouteBar.java
           cp pongo/overlays/res/drawable/pongo_speedometer_panel.xml android/OsmAnd/res/drawable/pongo_speedometer_panel.xml
           python3 - <<'PY'
           from pathlib import Path
           from xml.etree import ElementTree as ET
-          for name in ('speedometer_widget.xml', 'map_hud_top.xml', 'map_hud_bottom.xml'):
+          for name in ('speedometer_widget.xml', 'map_hud_top.xml', 'map_hud_bottom.xml', 'map_hud_layout.xml'):
               portrait = Path('android/OsmAnd/res/layout-port') / name
               ET.parse(portrait)
           ET.parse('android/OsmAnd/res/drawable/pongo_speedometer_panel.xml')
           speed = Path('android/OsmAnd/res/layout-port/speedometer_widget.xml').read_text()
           assert speed.index('id="@+id/speed_limit_container"') < speed.index('id="@+id/speedometer_container"')
+          hud = Path('android/OsmAnd/res/layout-port/map_hud_layout.xml').read_text()
+          assert 'net.osmand.plus.views.controls.PongoRouteBar' in hud
           print('Portrait overrides installed and parsed; landscape layouts left intact')
           PY
 
