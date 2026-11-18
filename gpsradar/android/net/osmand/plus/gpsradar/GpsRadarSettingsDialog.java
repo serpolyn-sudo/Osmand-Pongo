@@ -56,11 +56,16 @@ public final class GpsRadarSettingsDialog {
                 // Prevent duplicate stock camera speech in the enhanced mode.
                 if(extended&&!oldExtended) {
                     boolean nativeVoice=app.getSettings().SPEAK_SPEED_CAMERA.getModeValue(mode);
-                    pref.edit().putBoolean("saved_native_voice",nativeVoice).apply();
+                    boolean nativeVisible=app.getSettings().SHOW_CAMERAS.getModeValue(mode);
+                    pref.edit().putBoolean("saved_native_voice",nativeVoice)
+                        .putBoolean("saved_native_visible",nativeVisible).apply();
                     app.getSettings().SPEAK_SPEED_CAMERA.setModeValue(mode,false);
+                    app.getSettings().SHOW_CAMERAS.setModeValue(mode,false);
                 } else if(!extended&&oldExtended) {
                     app.getSettings().SPEAK_SPEED_CAMERA.setModeValue(mode,
                         pref.getBoolean("saved_native_voice",false));
+                    app.getSettings().SHOW_CAMERAS.setModeValue(mode,
+                        pref.getBoolean("saved_native_visible",false));
                 }
                 pref.edit().putBoolean("extended",extended).apply();
                 dialog.dismiss();show(activity,app,mode);
