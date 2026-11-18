@@ -27,3 +27,9 @@ Reference: user's iGO Pongo navigation screenshots, particularly the landscape n
 - Support landscape tablet sizes and portrait phone layout responsively.
 - Check that separate APK can install alongside original, open map, start/end a route, and show no fictitious values.
 - No full implementation or validation is implied by this design file.
+
+## Confirmed menu and speed-control decisions (18 Nov 2026)
+- Bottom-right combined battery-percentage / three-horizontal-lines control is the **main menu button**. Its action must open the **existing OsmAnd main menu unchanged**; do not redesign the menu yet.
+- The upper-right quick-settings control is distinct from the main menu button.
+- Bottom-left current speed and road speed-limit sign must sit adjacent, including examples such as 140 km/h only when real map/routing data indicates that limit.
+- Focus current implementation on the **navigation foreground/map HUD** and defer menu/settings redesign.
