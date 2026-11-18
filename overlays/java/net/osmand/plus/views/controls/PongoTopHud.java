@@ -12,6 +12,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 import androidx.annotation.Nullable;
 
@@ -35,6 +37,8 @@ public class PongoTopHud extends LinearLayout {
     private final TextView clock;
     private final TextView elevation;
     private final TextView settings;
+    // Preserve original visibility of native widgets so leaving navigation restores OsmAnd.
+    private final Map<View, Integer> nativeVisibility = new IdentityHashMap<>();
     private final Runnable update = new Runnable() {
         @Override public void run() {
             refresh();
@@ -123,7 +127,44 @@ public class PongoTopHud extends LinearLayout {
 
     @Override protected void onDetachedFromWindow() {
         handler.removeCallbacks(update);
+        restoreNativeWidgets();
         super.onDetachedFromWindow();
+    }
+
+
+    /**
+     * The Pongo panels REPLACE the default portrait navigation panels.
+     * Never suppress them outside active turn-by-turn navigation or in landscape.
+     * Keep native widget instances attached, so OsmAnd can still update them.
+     */
+    private void setNativeWidgetsHidden(boolean active) {
+        if (!active || getResources().getConfiguration().orientation
+                != android.content.res.Configuration.ORIENTATION_PORTRAIT) {
+            restoreNativeWidgets();
+            return;
+        }
+        for (String name : new String[]{
+                "top_widgets_panel",
+                "map_left_widgets_panel",
+                "map_right_widgets_panel",
+                "map_bottom_widgets_panel",
+                "map_menu_button"}) {
+            int id = getResources().getIdentifier(name, "id", getContext().getPackageName());
+            if (id == 0) continue;
+            View nativeView = getRootView().findViewById(id);
+            if (nativeView == null || nativeView == this) continue;
+            if (!nativeVisibility.containsKey(nativeView)) {
+                nativeVisibility.put(nativeView, nativeView.getVisibility());
+            }
+            nativeView.setVisibility(INVISIBLE);
+        }
+    }
+
+    private void restoreNativeWidgets() {
+        for (Map.Entry<View, Integer> entry : nativeVisibility.entrySet()) {
+            entry.getKey().setVisibility(entry.getValue());
+        }
+        nativeVisibility.clear();
     }
 
     private String direction(NextDirectionInfo info) {
@@ -155,6 +196,7 @@ public class PongoTopHud extends LinearLayout {
         RoutingHelper routing = app.getRoutingHelper();
         boolean active = routing != null && routing.isFollowingMode()
                 && routing.isRouteCalculated();
+        setNativeWidgetsHidden(active);
         turns.setVisibility(active ? VISIBLE : INVISIBLE);
         if (!active) return;
 
