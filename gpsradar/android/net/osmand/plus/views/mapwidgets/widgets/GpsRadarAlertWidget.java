@@ -31,7 +31,7 @@ public class GpsRadarAlertWidget extends SimpleWidget {
         updated=time;
         GpsRadarState.Snapshot s=GpsRadarState.latest();
         if(s==null || s.point==null) {
-            setText(NO_VALUE, "GPSRadar");
+            setText(null, null);
             return;
         }
         if(s.point.type!=lastIconType) {
