@@ -70,7 +70,7 @@ public final class RadarZipImporter {
                             result.add(new RadarCamera(lat, lon, type, speed, dirType,
                                     bearing, country));
                         }
-                    } catch (NumberFormatException | IllegalArgumentException invalidRecord) {
+                    } catch (IllegalArgumentException invalidRecord) {
                         // Not a camera record: ignore, but never invent coordinates.
                     }
                     if (result.size() > MAX_POINTS) throw new IOException("Too many objects");
