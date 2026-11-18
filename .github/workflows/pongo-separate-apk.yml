@@ -104,6 +104,40 @@ jobs:
           xml = xml.replace(old_authority, 'android:authorities="com.osmand.pongo.fileprovider"', 1)
           manifest.write_text(xml)
           print("Pongo nightly FileProvider authority patched")
+
+          # First real Pongo map UI element: independent branded HUD badge.
+          # Preserve map controls and all existing route/profile functionality.
+          layout = Path("android/OsmAnd/res/layout/main.xml")
+          main_xml = layout.read_text()
+          slot = '<include layout="@layout/map_hud_layout" />'
+          assert main_xml.count(slot) == 1, "Map layout changed; refusing unsafe UI patch"
+          pongo_badge = '''<TextView
+                android:id="@+id/pongo_navigation_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_gravity="top|center_horizontal"
+                android:layout_marginTop="64dp"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:gravity="center"
+                android:text="PONGO NAV"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:background="@drawable/pongo_nav_badge"
+                android:contentDescription="OsmAnd Pongo navigation" />'''
+          main_xml = main_xml.replace(slot, slot + '\\n\\n            ' + pongo_badge, 1)
+          layout.write_text(main_xml)
+          drawable = Path("android/OsmAnd/res/drawable/pongo_nav_badge.xml")
+          drawable.write_text('''<?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android"
+              android:shape="rectangle">
+              <solid android:color="#E51A283D" />
+              <corners android:radius="18dp" />
+              <stroke android:width="1dp" android:color="#40C9F6" />
+          </shape>
+          ''')
+          print("Pongo NAV map badge injected into main.xml")
           PY
           grep -A6 'nightlyFree {' android/OsmAnd/build.gradle | tail -n 6
 
