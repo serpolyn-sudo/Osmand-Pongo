@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gpsradar_widget_name">GPSRadar: предупреждения</string>
+    <string name="gpsradar_widget_description">Объект, ограничение, средняя скорость и расстояние до камеры</string>
+</resources>
