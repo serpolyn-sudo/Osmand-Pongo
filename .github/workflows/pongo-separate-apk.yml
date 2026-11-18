@@ -126,7 +126,7 @@ jobs:
                 android:textStyle="bold"
                 android:background="@drawable/pongo_nav_badge"
                 android:contentDescription="OsmAnd Pongo navigation" />'''
-          main_xml = main_xml.replace(slot, slot + '\\n\\n            ' + pongo_badge, 1)
+          main_xml = main_xml.replace(slot, slot + '\n\n            ' + pongo_badge, 1)
           layout.write_text(main_xml)
           drawable = Path("android/OsmAnd/res/drawable/pongo_nav_badge.xml")
           drawable.write_text('''<?xml version="1.0" encoding="utf-8"?>
