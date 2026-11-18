@@ -7,6 +7,7 @@ import net.osmand.plus.activities.MapActivity;
 import net.osmand.plus.views.layers.base.OsmandMapLayer.DrawSettings;
 import net.osmand.plus.views.mapwidgets.WidgetsPanel;
 import net.osmand.plus.gpsradar.GpsRadarState;
+import net.osmand.plus.gpsradar.GpsRadarSettingsDialog;
 import net.osmand.plus.views.mapwidgets.WidgetType;
 
 /** Registered with the original OsmAnd widget catalog (left/right/top/bottom). */
@@ -16,6 +17,10 @@ public class GpsRadarAlertWidget extends SimpleWidget {
                                @Nullable WidgetsPanel panel) {
         super(activity, WidgetType.GPSRADAR_ALERT, customId, panel);
         setIcons(WidgetType.GPSRADAR_ALERT);
+    }
+
+    @Override protected android.view.View.OnClickListener getOnClickListener() {
+        return view -> GpsRadarSettingsDialog.show(mapActivity,app);
     }
 
     @Override protected void updateSimpleWidgetInfo(@Nullable DrawSettings settings) {
