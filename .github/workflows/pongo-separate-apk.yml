@@ -156,6 +156,7 @@ jobs:
           test -f pongo/overlays/java/net/osmand/plus/views/controls/PongoRouteBar.java
           test -f pongo/overlays/java/net/osmand/plus/views/controls/PongoTopHud.java
           test -f pongo/overlays/res/drawable/pongo_speedometer_panel.xml
+          test -f pongo/overlays/res/drawable/pongo_speed_limit_circle.xml
           mkdir -p android/OsmAnd/res/layout-port android/OsmAnd/res/drawable android/OsmAnd/src/net/osmand/plus/views/controls
           cp pongo/overlays/res/layout-port/speedometer_widget.xml android/OsmAnd/res/layout-port/speedometer_widget.xml
           cp pongo/overlays/res/layout-port/map_hud_top.xml android/OsmAnd/res/layout-port/map_hud_top.xml
@@ -164,6 +165,7 @@ jobs:
           cp pongo/overlays/java/net/osmand/plus/views/controls/PongoRouteBar.java android/OsmAnd/src/net/osmand/plus/views/controls/PongoRouteBar.java
           cp pongo/overlays/java/net/osmand/plus/views/controls/PongoTopHud.java android/OsmAnd/src/net/osmand/plus/views/controls/PongoTopHud.java
           cp pongo/overlays/res/drawable/pongo_speedometer_panel.xml android/OsmAnd/res/drawable/pongo_speedometer_panel.xml
+          cp pongo/overlays/res/drawable/pongo_speed_limit_circle.xml android/OsmAnd/res/drawable/pongo_speed_limit_circle.xml
           python3 - <<'PY'
           from pathlib import Path
           from xml.etree import ElementTree as ET
@@ -171,6 +173,7 @@ jobs:
               portrait = Path('android/OsmAnd/res/layout-port') / name
               ET.parse(portrait)
           ET.parse('android/OsmAnd/res/drawable/pongo_speedometer_panel.xml')
+          ET.parse('android/OsmAnd/res/drawable/pongo_speed_limit_circle.xml')
           speed = Path('android/OsmAnd/res/layout-port/speedometer_widget.xml').read_text()
           assert speed.index('id="@+id/speed_limit_container"') < speed.index('id="@+id/speedometer_container"')
           hud = Path('android/OsmAnd/res/layout-port/map_hud_layout.xml').read_text()
