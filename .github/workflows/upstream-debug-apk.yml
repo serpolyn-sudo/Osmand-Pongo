@@ -64,8 +64,13 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Use GitHub runner Android SDK
+        shell: bash
+        run: |
+          echo "ANDROID_HOME=${ANDROID_SDK_ROOT}" >> "$GITHUB_ENV"
+          echo "Android SDK: ${ANDROID_SDK_ROOT}"
+          ls -la "${ANDROID_SDK_ROOT}/cmdline-tools" || true
+          "${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager" --version
 
       - name: Make Gradle wrapper executable
         working-directory: android
