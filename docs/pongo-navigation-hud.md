@@ -33,3 +33,10 @@ Reference: user's iGO Pongo navigation screenshots, particularly the landscape n
 - The upper-right quick-settings control is distinct from the main menu button.
 - Bottom-left current speed and road speed-limit sign must sit adjacent, including examples such as 140 km/h only when real map/routing data indicates that limit.
 - Focus current implementation on the **navigation foreground/map HUD** and defer menu/settings redesign.
+
+## Orientation-specific layout (approved 18 Nov 2026)
+- **Landscape:** retain the previously approved landscape Pongo HUD layout as-is. Do not apply portrait-only sizing or positions to landscape.
+- **Portrait:** follow the supplied iGO Pongo portrait screenshot. Top-left first/second maneuver widgets; top-right time, elevation and separate quick settings; keep the central 3D navigation map open. Bottom-left speed limit above current GPS speed, bottom road-name strip with route shields and ETA, duration, remaining distance. Bottom-right battery percentage plus a button opening the current (unchanged) OsmAnd main menu.
+- Native Android `res/layout-port/` overrides are used to make portrait widget containers independent of landscape. The first committed implementation moves real native speed-limit above speedometer and adjusts the portrait top panel insets; it does **not** yet implement the full screenshot-style HUD, route banner, battery-menu hybrid control, or all route readouts.
+- Every data value must come from OsmAnd live navigation, GPS or system state; don't hardcode the values appearing in the reference picture.
+- **Do not trigger APK builds until layout preview has been reviewed.** The implementation is prepared on `feature/portrait-pongo-hud`, distinct from `main`. A later merge to `main` may trigger automatic Actions runs because of workflow path triggers.
