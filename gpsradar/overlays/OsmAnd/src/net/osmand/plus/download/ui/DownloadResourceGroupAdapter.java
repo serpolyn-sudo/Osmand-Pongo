@@ -160,7 +160,7 @@ public class DownloadResourceGroupAdapter extends OsmandBaseExpandableListAdapte
             TextView title=camera.findViewById(R.id.title);
             title.setText("Камеры контроля скорости");
             title.setCompoundDrawablesWithIntrinsicBounds(
-               R.drawable.ic_action_speed_camera,0,0,0);
+               R.drawable.ic_action_search_dark,0,0,0);
             camera.setOnClickListener(button->GpsRadarDownloadDialog.show(ctx));
             combined.addView(camera);
             if(v.getParent() instanceof ViewGroup)
