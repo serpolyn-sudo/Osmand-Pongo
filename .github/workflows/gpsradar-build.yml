@@ -107,6 +107,7 @@ jobs:
               "android/OsmAnd/res/xml/screen_alerts.xml").read_text()
           assert Path("android/OsmAnd/assets/gpsradar_icons/atlas24.png").stat().st_size > 1000
           print("GPSRadar native hooks, original 32-icon atlas and profile settings installed")
+          print("Clean GPSRadar source commit: ${GITHUB_SHA:-unknown}")
           PY
       - name: Build separate GPSRadar APK
         working-directory: android
