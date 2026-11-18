@@ -63,7 +63,7 @@ public final class GpsRadarSettingsDialog {
                         pref.getBoolean("saved_native_voice",false));
                 }
                 pref.edit().putBoolean("extended",extended).apply();
-                dialog.dismiss();show(activity,app);
+                dialog.dismiss();show(activity,app,mode);
           }).setNegativeButton("Отмена",null).show();
     }
     private static void editText(Activity activity,OsmandApplication app,
