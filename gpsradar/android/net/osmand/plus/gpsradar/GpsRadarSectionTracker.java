@@ -39,7 +39,7 @@ public final class GpsRadarSectionTracker {
                 || !position.hasSpeed() || position.getSpeed()<1.4f) {
             return snapshot(false);
         }
-        long time=position.getElapsedRealtimeNanos();
+        long time=android.os.SystemClock.elapsedRealtimeNanos();
         if(time<=0) return snapshot(false);
         if(active && previous!=null && lastNanos>0) {
             long dt=time-lastNanos;
