@@ -6,6 +6,7 @@ on:
     branches: [main, feature/portrait-pongo-hud]
     paths:
       - '.github/workflows/pongo-separate-apk.yml'
+      - 'overlays/**'
 
 permissions:
   contents: read
