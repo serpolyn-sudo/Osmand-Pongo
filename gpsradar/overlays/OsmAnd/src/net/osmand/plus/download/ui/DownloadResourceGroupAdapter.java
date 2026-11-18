@@ -134,6 +134,7 @@ public class DownloadResourceGroupAdapter extends OsmandBaseExpandableListAdapte
 	@Override
 	public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 		View v = convertView;
+        if (v != null && "gpsradar_camera_row".equals(v.getTag())) v = null;
 		String section = getGroup(groupPosition);
 		if (v == null) {
 			LayoutInflater inflater = LayoutInflater.from(ctx);
