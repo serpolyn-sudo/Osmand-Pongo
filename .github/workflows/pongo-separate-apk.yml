@@ -140,6 +140,26 @@ jobs:
           PY
           grep -A6 'nightlyFree {' android/OsmAnd/build.gradle | tail -n 6
 
+      - name: Overlay portrait Pongo HUD resources
+        shell: bash
+        run: |
+          # Uses separate Android layout-port resources: landscape resources remain unchanged.
+          test -f overlays/res/layout-port/speedometer_widget.xml
+          test -f overlays/res/layout-port/map_hud_top.xml
+          mkdir -p android/OsmAnd/res/layout-port
+          cp overlays/res/layout-port/speedometer_widget.xml android/OsmAnd/res/layout-port/speedometer_widget.xml
+          cp overlays/res/layout-port/map_hud_top.xml android/OsmAnd/res/layout-port/map_hud_top.xml
+          python3 - <<'PY'
+          from pathlib import Path
+          from xml.etree import ElementTree as ET
+          for name in ('speedometer_widget.xml', 'map_hud_top.xml'):
+              portrait = Path('android/OsmAnd/res/layout-port') / name
+              ET.parse(portrait)
+          speed = Path('android/OsmAnd/res/layout-port/speedometer_widget.xml').read_text()
+          assert speed.index('id="@+id/speed_limit_container"') < speed.index('id="@+id/speedometer_container"')
+          print('Portrait overrides installed and parsed; landscape layouts left intact')
+          PY
+
       - name: Assemble OsmAnd debug APK
         working-directory: android
         env:
