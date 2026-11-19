@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.LinearLayout;
+import android.widget.Button;
 import net.osmand.plus.gpsradar.GpsRadarDownloadDialog;
 
 import androidx.annotation.NonNull;
@@ -156,11 +157,16 @@ public class DownloadResourceGroupAdapter extends OsmandBaseExpandableListAdapte
 						R.drawable.ic_action_search_dark, 0, 0, 0);
 				camera.setOnClickListener(button -> GpsRadarDownloadDialog.show(ctx));
 				combined.addView(camera);
+				Button europe = new Button(ctx);
+				europe.setText("Европа");
+				europe.setAllCaps(false);
+				europe.setOnClickListener(button -> GpsRadarDownloadDialog.show(ctx));
+				combined.addView(europe);
 				View section = LayoutInflater.from(ctx).inflate(
 						R.layout.download_item_list_section, combined, false);
 				combined.addView(section);
 			}
-			View section = combined.getChildAt(1);
+			View section = combined.getChildAt(2);
 			TextView sectionTitle = section.findViewById(R.id.title);
 			sectionTitle.setText(getGroup(groupPosition));
 			section.setOnClickListener(null);
