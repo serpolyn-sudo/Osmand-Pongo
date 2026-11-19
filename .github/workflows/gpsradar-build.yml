@@ -6,6 +6,7 @@ on:
     branches: [feature/osmand-gpsradar-clean]
     paths:
       - '.github/workflows/gpsradar-build.yml'
+      - 'gpsradar/**'
 
 permissions:
   contents: read
