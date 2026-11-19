@@ -43,6 +43,8 @@ public final class GpsRadarMapLayer extends OsmandMapLayer {
         super(app);this.app=app;store=new GpsRadarStore(app);
         GpsRadarEngine.initialize(app);
     }
+    @Override public boolean drawInScreenPixels() { return false; }
+
     @Override public void onDraw(Canvas canvas,RotatedTileBox box,DrawSettings settings) {
         String profile=app.getSettings().getApplicationMode().getStringKey();
         android.content.SharedPreferences pref=app.getSharedPreferences(
