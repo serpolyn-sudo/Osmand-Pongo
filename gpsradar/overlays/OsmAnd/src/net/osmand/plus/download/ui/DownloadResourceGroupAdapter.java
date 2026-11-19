@@ -153,7 +153,7 @@ public class DownloadResourceGroupAdapter extends OsmandBaseExpandableListAdapte
         DownloadResourceGroupType type=data.get(groupPosition).getType();
         if ((type==DownloadResourceGroupType.NAUTICAL_MAPS ||
              type==DownloadResourceGroupType.NAUTICAL_MAPS_GROUP) &&
-              mainGroup != null && !mainGroup.getType().isScreen()) {
+              mainGroup != null && mainGroup.getType() == DownloadResourceGroupType.WORLD) {
             LinearLayout combined=new LinearLayout(ctx);
             combined.setOrientation(LinearLayout.VERTICAL);
             View camera=LayoutInflater.from(ctx).inflate(
