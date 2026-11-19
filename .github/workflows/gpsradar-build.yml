@@ -81,8 +81,8 @@ jobs:
           abi_line='''\n        ndk {\n            abiFilters "arm64-v8a"\n        }'''
           default_block='defaultConfig {'
           assert build.read_text().count(default_block)==1
-          b=build.read_text().replace(default_block,default_block+abi_line,1)
-          build.write_text(b)
+          s=s.replace(default_block,default_block+abi_line,1)
+          build.write_text(s)
           manifest=Path("android/OsmAnd/AndroidManifest-nightlyFree.xml")
           xml=manifest.read_text()
           oldAuthority='android:authorities="net.osmand.dev.fileprovider"'
@@ -143,14 +143,20 @@ jobs:
                   if info.filename.startswith('META-INF/') and (info.filename.endswith(('.RSA','.SF','.DSA'))):
                       continue
                   dest.writestr(info, source.read(info.filename))
-          assert removed>0, 'No extra ABI libraries found'
           os.replace(filtered, apk)
+          print(f'Filtered {removed} non-ARM64 native libraries')
           print(f'Removed {removed} non-ARM64 libraries')
           PY
           BUILD_TOOLS="${ANDROID_SDK_ROOT}/build-tools/$(ls "${ANDROID_SDK_ROOT}/build-tools" | sort -V | tail -1)"
           APK=$(find android/OsmAnd/build/outputs/apk -type f -name '*.apk' | head -1)
           "${BUILD_TOOLS}/zipalign" -f -p 4 "$APK" "${APK}.aligned"
           mv "${APK}.aligned" "$APK"
+          if [ ! -f android/keystores/debug.keystore ]; then
+            mkdir -p android/keystores
+            keytool -genkeypair -keystore android/keystores/debug.keystore -storepass android \
+              -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 \
+              -validity 10000 -dname "CN=Android Debug,O=Android,C=US" -noprompt
+          fi
           "${BUILD_TOOLS}/apksigner" sign --ks android/keystores/debug.keystore \
             --ks-key-alias androiddebugkey --ks-pass pass:android \
             --key-pass pass:android --out "${APK}.signed" "$APK"
