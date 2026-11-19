@@ -76,7 +76,13 @@ jobs:
           oldName='resValue "string", "app_name", "OsmAnd Nightly"'
           assert s.count(oldName)==1
           s=s.replace(oldName,'resValue "string", "app_name", "OsmAnd GPSRadar"',1)
-          build.write_text(s)
+          # Keep OpenGL but package only native libraries used by modern ARM64 phones.
+          # Fat debug APK otherwise includes multiple ABIs and becomes needlessly huge.
+          abi_line='''\n        ndk {\n            abiFilters "arm64-v8a"\n        }'''
+          default_block='defaultConfig {'
+          assert build.read_text().count(default_block)==1
+          b=build.read_text().replace(default_block,default_block+abi_line,1)
+          build.write_text(b)
           manifest=Path("android/OsmAnd/AndroidManifest-nightlyFree.xml")
           xml=manifest.read_text()
           oldAuthority='android:authorities="net.osmand.dev.fileprovider"'
@@ -109,13 +115,26 @@ jobs:
           print("GPSRadar native hooks, original 32-icon atlas and profile settings installed")
           print("Clean GPSRadar source commit: ${GITHUB_SHA:-unknown}")
           PY
-      - name: Build separate GPSRadar APK
+      - name: Build ARM64 OpenGL GPSRadar APK
         working-directory: android
         env:
           GRADLE_OPTS: '-Dorg.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8'
         run: |
           chmod +x gradlew
           ./gradlew :OsmAnd:assembleNightlyFreeOpenglFatDebug --stacktrace --no-daemon --console=plain
+      - name: Inspect native libraries and APK size
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import glob, zipfile, os
+          apks=glob.glob('android/OsmAnd/build/outputs/apk/**/*.apk',recursive=True)
+          assert apks, 'APK not found'
+          for apk in apks:
+              with zipfile.ZipFile(apk) as z:
+                  abis=sorted({n.split('/')[1] for n in z.namelist() if n.startswith('lib/') and n.endswith('.so')})
+              print(apk, 'size_MB=',round(os.path.getsize(apk)/1048576,1), 'ABIs=',abis)
+              assert not (set(abis)-{'arm64-v8a'}), 'Unexpected native ABIs packaged'
+          PY
       - name: Inspect APK identity
         shell: bash
         run: |
@@ -127,7 +146,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: OsmAnd-GPSRadar-clean-debug-apk
+          name: OsmAnd-GPSRadar-arm64-opengl-debug-apk
           path: android/OsmAnd/build/outputs/apk/**/*.apk
           if-no-files-found: warn
           retention-days: 14
