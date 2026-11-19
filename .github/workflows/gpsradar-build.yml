@@ -122,6 +122,41 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew :OsmAnd:assembleNightlyFreeOpenglFatDebug --stacktrace --no-daemon --console=plain
+      - name: Produce compact ARM64 APK and sign with debug key
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import glob, os, zipfile
+          apks=glob.glob('android/OsmAnd/build/outputs/apk/**/*.apk', recursive=True)
+          assert len(apks)==1, f'Expected one APK, got {apks}'
+          apk=apks[0]
+          filtered=apk+'.filtered'
+          removed=0
+          with zipfile.ZipFile(apk, 'r') as source, zipfile.ZipFile(filtered, 'w', allowZip64=True) as dest:
+              for info in source.infolist():
+                  parts=info.filename.split('/')
+                  if len(parts)>2 and parts[0]=='lib' and parts[1] in ('armeabi-v7a','x86','x86_64'):
+                      removed+=1
+                      continue
+                  # v1/v2 signatures must be regenerated. Keep all other entries.
+                  if info.filename.startswith('META-INF/') and (info.filename.endswith(('.RSA','.SF','.DSA'))):
+                      continue
+                  dest.writestr(info, source.read(info.filename))
+          assert removed>0, 'No extra ABI libraries found'
+          os.replace(filtered, apk)
+          print(f'Removed {removed} non-ARM64 libraries')
+          PY
+          BUILD_TOOLS="${ANDROID_SDK_ROOT}/build-tools/$(ls "${ANDROID_SDK_ROOT}/build-tools" | sort -V | tail -1)"
+          APK=$(find android/OsmAnd/build/outputs/apk -type f -name '*.apk' | head -1)
+          "${BUILD_TOOLS}/zipalign" -f -p 4 "$APK" "${APK}.aligned"
+          mv "${APK}.aligned" "$APK"
+          "${BUILD_TOOLS}/apksigner" sign --ks android/keystores/debug.keystore \
+            --ks-key-alias androiddebugkey --ks-pass pass:android \
+            --key-pass pass:android --out "${APK}.signed" "$APK"
+          mv "${APK}.signed" "$APK"
+          "${BUILD_TOOLS}/apksigner" verify --verbose "$APK"
+          "${BUILD_TOOLS}/zipalign" -c -p 4 "$APK"
       - name: Inspect native libraries and APK size
         shell: bash
         run: |
