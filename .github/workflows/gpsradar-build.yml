@@ -115,7 +115,7 @@ jobs:
           GRADLE_OPTS: '-Dorg.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8'
         run: |
           chmod +x gradlew
-          ./gradlew :OsmAnd:assembleNightlyFreeLegacyFatDebug --stacktrace --no-daemon --console=plain
+          ./gradlew :OsmAnd:assembleNightlyFreeOpenglFatDebug --stacktrace --no-daemon --console=plain
       - name: Inspect APK identity
         shell: bash
         run: |
