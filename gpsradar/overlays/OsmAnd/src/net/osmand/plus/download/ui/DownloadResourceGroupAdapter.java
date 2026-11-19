@@ -133,43 +133,56 @@ public class DownloadResourceGroupAdapter extends OsmandBaseExpandableListAdapte
 
 	@Override
 	public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+		// The camera entry is a separate clickable child of the category header.
+		// Never re-parent a recycled ExpandableListView row: that can crash while scrolling.
+		boolean cameraSection = mainGroup != null
+				&& mainGroup.getType() == DownloadResourceGroupType.WORLD
+				&& (data.get(groupPosition).getType() == DownloadResourceGroupType.NAUTICAL_MAPS
+					|| data.get(groupPosition).getType() == DownloadResourceGroupType.NAUTICAL_MAPS_GROUP);
+		if (cameraSection) {
+			LinearLayout combined;
+			if (convertView instanceof LinearLayout
+					&& "gpsradar_camera_row".equals(convertView.getTag())) {
+				combined = (LinearLayout) convertView;
+			} else {
+				combined = new LinearLayout(ctx);
+				combined.setOrientation(LinearLayout.VERTICAL);
+				combined.setTag("gpsradar_camera_row");
+				View camera = LayoutInflater.from(ctx).inflate(
+						R.layout.simple_list_menu_item, combined, false);
+				TextView cameraTitle = camera.findViewById(R.id.title);
+				cameraTitle.setText("Камеры контроля скорости");
+				cameraTitle.setCompoundDrawablesWithIntrinsicBounds(
+						R.drawable.ic_action_search_dark, 0, 0, 0);
+				camera.setOnClickListener(button -> GpsRadarDownloadDialog.show(ctx));
+				combined.addView(camera);
+				View section = LayoutInflater.from(ctx).inflate(
+						R.layout.download_item_list_section, combined, false);
+				combined.addView(section);
+			}
+			View section = combined.getChildAt(1);
+			TextView sectionTitle = section.findViewById(R.id.title);
+			sectionTitle.setText(getGroup(groupPosition));
+			section.setOnClickListener(null);
+			TypedValue color = new TypedValue();
+			ctx.getTheme().resolveAttribute(R.attr.activity_background_color, color, true);
+			section.setBackgroundColor(color.data);
+			return combined;
+		}
 		View v = convertView;
-        if (v != null && "gpsradar_camera_row".equals(v.getTag())) v = null;
-		String section = getGroup(groupPosition);
+		if (v != null && "gpsradar_camera_row".equals(v.getTag())) {
+			v = null;
+		}
 		if (v == null) {
-			LayoutInflater inflater = LayoutInflater.from(ctx);
-			v = inflater.inflate(R.layout.download_item_list_section, parent, false);
+			v = LayoutInflater.from(ctx).inflate(
+					R.layout.download_item_list_section, parent, false);
 		}
 		TextView nameView = v.findViewById(R.id.title);
-		nameView.setText(section);
+		nameView.setText(getGroup(groupPosition));
 		v.setOnClickListener(null);
 		TypedValue typedValue = new TypedValue();
-		Resources.Theme theme = ctx.getTheme();
-		theme.resolveAttribute(R.attr.activity_background_color, typedValue, true);
+		ctx.getTheme().resolveAttribute(R.attr.activity_background_color, typedValue, true);
 		v.setBackgroundColor(typedValue.data);
-
-        // Insert the native-looking GPSRadar download row directly above
-        // the existing Marine maps category without disturbing OsmAnd indexes.
-        DownloadResourceGroupType type=data.get(groupPosition).getType();
-        if ((type==DownloadResourceGroupType.NAUTICAL_MAPS ||
-             type==DownloadResourceGroupType.NAUTICAL_MAPS_GROUP) &&
-              mainGroup != null && mainGroup.getType() == DownloadResourceGroupType.WORLD) {
-            LinearLayout combined=new LinearLayout(ctx);
-            combined.setOrientation(LinearLayout.VERTICAL);
-            View camera=LayoutInflater.from(ctx).inflate(
-                R.layout.simple_list_menu_item,combined,false);
-            TextView title=camera.findViewById(R.id.title);
-            title.setText("Камеры контроля скорости");
-            title.setCompoundDrawablesWithIntrinsicBounds(
-               R.drawable.ic_action_search_dark,0,0,0);
-            camera.setOnClickListener(button->GpsRadarDownloadDialog.show(ctx));
-            combined.addView(camera);
-            if(v.getParent() instanceof ViewGroup)
-                ((ViewGroup)v.getParent()).removeView(v);
-            combined.addView(v);
-            combined.setTag("gpsradar_camera_row");
-            return combined;
-        }
 		return v;
 	}
 
